@@ -1,5 +1,5 @@
 Vvveb.ComponentsGroup['Base'] =
-["html/heading", "html/image", "html/hr",  "html/form", "html/textinput", "html/textareainput", "html/selectinput", "html/fileinput", "html/checkbox", "html/radiobutton", "html/link", "html/video", "html/button", "html/paragraph", "html/blockquote", "html/list", "html/table", "html/preformatted", "html/audio", "html/video"];
+["html/heading", "html/image", "html/hr",  "html/form", "html/textinput", "html/textareainput", "html/selectinput"/*, "html/fileinput"*/, "html/checkbox", "html/radiobutton", "html/link", "html/button", "html/paragraph", "html/blockquote", "html/list", "html/table", "html/preformatted", "html/audio", "html/video","html/iframe"];
 
 Vvveb.Components.extend("_base", "html/heading", {
     image: "icons/heading.svg",
@@ -7,19 +7,18 @@ Vvveb.Components.extend("_base", "html/heading", {
     nodes: ["h1", "h2","h3", "h4","h5","h6"],
     html: "<h1>Heading</h1>",
     
-	properties: [
-	{
+	properties: [{
         name: "Size",
         key: "size",
         inputtype: SelectInput,
         
         onChange: function(node, value) {
-			
+
 			return changeNodeName(node, "h" + value);
 		},	
 			
         init: function(node) {
-            var regex;
+            let regex;
             regex = /H(\d)/.exec(node.nodeName);
             if (regex && regex[1]) {
                 return regex[1]
@@ -66,7 +65,7 @@ let linkComponentProperties = [
 		sort:2,
 		htmlAttr: "href",
 		inputtype: LinkInput
-	}, {
+	},{
 		name: "Rel",
 		key: "rel",
 		sort:3,
@@ -128,12 +127,12 @@ Vvveb.Components.extend("_base", "html/image", {
         name: "Width",
         key: "width",
         htmlAttr: "width",
-        inputtype: TextInput
+        inputtype: NumberInput
     }, {
         name: "Height",
         key: "height",
         htmlAttr: "height",
-        inputtype: TextInput
+        inputtype: NumberInput
     }, {
         name: "Alt",
         key: "alt",
@@ -174,10 +173,10 @@ Vvveb.Components.extend("_base", "html/image", {
                 checked:false,
             }],
         },
-    },{
+	},{
 		key: "link_options",
         inputtype: SectionInput,
-        name:false,
+        //name:false,
         data: {header:"Link"},
     },{
         name: "Enable link",
@@ -187,24 +186,32 @@ Vvveb.Components.extend("_base", "html/image", {
             className: "form-switch"
         },
 		setGroup: value => {
-			let group = $('.mb-3[data-group="link"]');
-			if (value) {	
-				group.attr('style','');
-			} else {
-				group.attr('style','display:none !important');
+			let group = document.querySelectorAll('.mb-3[data-group="link"]');
+			if (group.length) {
+				group.forEach(el => {
+					if (value) {	
+						el.style.display = "";
+					} else {
+						el.style.display = "none";
+					}
+				});
 			}
 		}, 		
 		onChange : function(node, value, input)  {
 			this.setGroup(value);
 			if (value) {
-				$(node).wrap('<a href="#"></a>');
+				const wrappingElement = document.createElement('a');
+				node.replaceWith(wrappingElement);
+				wrappingElement.appendChild(node);
 			} else {
-				$(node).unwrap('a');
+				if (node.parentNode.tagName.toLowerCase() == "a"){
+					node.parentNode.replaceWith(node);
+				}
 			}
 			return node;
 		}, 
 		init: function (node) {
-			let value = node.parentNode.tagName.toLowerCase() == "a"
+			let value = node.parentNode.tagName.toLowerCase() == "a";
 			this.setGroup(value);
 			return value;
 		}
@@ -214,13 +221,16 @@ Vvveb.Components.extend("_base", "html/image", {
 		(el) => {let a = Object.assign({}, el);a["parent"] = "a";a["group"] = "link";return a}
 	)),
 	
-    init(node)	{
-
-		let group = $('.mb-3[data-group="link"]');
-		if (node.parentNode.tagName.toLowerCase() == "a") {	
-			group.attr('style','');
-		} else {
-			group.attr('style','display:none !important');
+    init(node) {
+		let group = document.querySelectorAll('.mb-3[data-group="link"]');
+		if (group.length) {
+			group.forEach(el => {
+				if (value) {	
+					el.style.display = "";
+				} else {
+					el.style.display = "none";
+				}
+			});
 		}
 
 		return node;
@@ -231,7 +241,98 @@ Vvveb.Components.extend("_base", "html/hr", {
     image: "icons/hr.svg",
     nodes: ["hr"],
     name: "Horizontal Rule",
-    html: "<hr>"
+    html: '<hr class="border-primary border-4 opacity-25">',
+	properties:[{
+        name: "Type",
+        key: "border-color",
+		htmlAttr: "class",
+        validValues: ["border-primary", "border-secondary", "border-success", "border-danger", "border-warning", "border-info", "border-light", "border-dark", "border-white"],
+        inputtype: SelectInput,
+        data: {
+            options: [{
+				value: "Default",
+				text: ""
+			}, {
+				value: "border-primary",
+				text: "Primary"
+			}, {
+				value: "border-secondary",
+				text: "Secondary"
+			}, {
+				value: "border-success",
+				text: "Success"
+			}, {
+				value: "border-danger",
+				text: "Danger"
+			}, {
+				value: "border-warning",
+				text: "Warning"
+			}, {
+				value: "border-info",
+				text: "Info"
+			}, {
+				value: "border-light",
+				text: "Light"
+			}, {
+				value: "border-dark",
+				text: "Dark"
+			}, {
+				value: "border-white",
+				text: "White"
+			}]
+        }
+    },{
+        name: "Border",
+        key: "border-size",
+		htmlAttr: "class",
+        validValues: ["border-1", "border-2", "border-3", "border-4", "border-5"],
+        inputtype: SelectInput,
+        data: {
+            options: [{
+				value: "Default",
+				text: ""
+			}, {
+				value: "border-1",
+				text: "Size 1"
+			}, {
+				value: "border-2",
+				text: "Size 2"
+			}, {
+				value: "border-3",
+				text: "Size 3"
+			}, {
+				value: "border-4",
+				text: "Size 4"
+			}, {
+				value: "border-5",
+				text: "Size 5"
+			}]
+        }
+    },{
+        name: "Opacity",
+        key: "opacity",
+		htmlAttr: "class",
+        validValues: ["opacity-25", "opacity-50", "opacity-75", "opacity-100"],
+        inputtype: SelectInput,
+        data: {
+            options: [{
+				value: "Default",
+				text: ""
+			}, {
+				value: "opacity-25",
+				text: "Opacity 25%"
+			}, {
+				value: "opacity-50",
+				text: "Opacity 50%"
+			}, {
+				value: "opacity-75",
+				text: "Opacity 75%"
+			}, {
+				value: "opacity-100",
+				text: "Opacity 100%"
+			}]
+        }
+    }]
 });
 
 Vvveb.Components.extend("_base", "html/label", {
@@ -252,8 +353,13 @@ Vvveb.Components.extend("_base", "html/textinput", {
 	nodes: ["input"],
 	//attributes: {"type":"text"},
     image: "icons/text_input.svg",
-    html: '<div class="mb-3"><label>Text</label><input type="text" class="form-control"></div></div>',
+    html: '<input type="text" class="form-control">',
     properties: [{
+        name: "Name",
+        key: "name",
+        htmlAttr: "name",
+        inputtype: TextInput
+    }, {
         name: "Value",
         key: "value",
         htmlAttr: "value",
@@ -345,12 +451,14 @@ Vvveb.Components.extend("_base", "html/textinput", {
         key: "disabled",
         htmlAttr: "disabled",
 		col:6,
+		inline:true,
         inputtype: CheckboxInput,
 	},{
         name: "Required",
         key: "required",
         htmlAttr: "required",
 		col:6,
+		inline:true,
         inputtype: CheckboxInput,
     }]
 });
@@ -359,58 +467,72 @@ Vvveb.Components.extend("_base", "html/selectinput", {
 	nodes: ["select"],
     name: "Select Input",
     image: "icons/select_input.svg",
-    html: '<div class="mb-3"><label>Choose an option </label><select class="form-control"><option value="value1">Text 1</option><option value="value2">Text 2</option><option value="value3">Text 3</option></select></div>',
+    html: '<select class="form-control"><option value="value1">Text 1</option><option value="value2">Text 2</option><option value="value3">Text 3</option></select>',
 
-	beforeInit: function (node)
-	{
-		console.log(node);
+	beforeInit: function (node) {
 		properties = [];
-		var i = 0;
+		let i = 0;
 		
-		$(node).find('option').each(function(e) {
-			data = {"value": this.value, "text": this.text};
+		node.querySelectorAll('option').forEach(el => {
+			data = {"value": el.value, "text": el.text};
 			i++;
 			properties.push({
 				name: "Option " + i,
 				key: "option" + i,
 				//index: i - 1,
-				optionNode: this,
+				optionNode: el,
 				inline:true,
 				inputtype: TextValueInput,
 				data: data,
 				onChange: function(node, value, input) {
 					
-					option = $(this.optionNode);
+					option = this.optionNode;
 					
 					//if remove button is clicked remove option and render row properties
-					if (input.nodeName == 'BUTTON')
-					{
+					if (input.nodeName == 'BUTTON') {
 						option.remove();
 						Vvveb.Components.render("html/selectinput");
 						return node;
 					}
 
-					if (input.name == "value") option.attr("value", value); 
-					else if (input.name == "text") option.text(value);
-					
+					if (input.name == "value") option.setAttribute("value", value); 
+					else if (input.name == "text") option.textContent = value;
 					return node;
 				},	
 			});
 		});
-		
+
 		//remove all option properties
 		this.properties = this.properties.filter(function(item) {
 			return item.key.indexOf("option") === -1;
 		});
 		
 		//add remaining properties to generated column properties
-		properties.push(this.properties[0]);
+		this.properties =  properties.concat(this.properties);
 		
-		this.properties = properties;
 		return node;
 	},
     
     properties: [{
+        name: "Name",
+        key: "name",
+        htmlAttr: "name",
+        inputtype: TextInput
+    }, {
+        name: "Disabled",
+        key: "disabled",
+        htmlAttr: "disabled",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
+	},{
+        name: "Required",
+        key: "required",
+        htmlAttr: "required",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
+    }, {
         name: "Option",
         key: "option1",
         inputtype: TextValueInput
@@ -425,7 +547,7 @@ Vvveb.Components.extend("_base", "html/selectinput", {
         data: {text:"Add option", icon:"la-plus"},
         onChange: function(node)
         {
-			 $(node).append('<option value="value">Text</option>');
+			 node.append(generateElements('<option value="value">Text</option>')[0]);
 			 
 			 //render component properties again to include the new column inputs
 			 Vvveb.Components.render("html/selectinput");
@@ -436,9 +558,50 @@ Vvveb.Components.extend("_base", "html/selectinput", {
 });
 
 Vvveb.Components.extend("_base", "html/textareainput", {
+	nodes: ["textarea"],
     name: "Text Area",
     image: "icons/text_area.svg",
-    html: '<div class="mb-3"><label>Your response:</label><textarea class="form-control"></textarea></div>'
+    html: '<textarea class="form-control"></textarea>',
+	properties: [{
+        name: "Name",
+        key: "name",
+        htmlAttr: "name",
+        inputtype: TextInput
+    }, {
+        name: "Value",
+        key: "value",
+        htmlAttr: "value",
+        inputtype: TextInput
+    }, {
+        name: "Placeholder",
+        key: "placeholder",
+        htmlAttr: "placeholder",
+        inputtype: TextInput
+    }, {
+        name: "Columns",
+        key: "cols",
+        htmlAttr: "cols",
+        inputtype: NumberInput
+    }, {
+        name: "Rows",
+        key: "rows",
+        htmlAttr: "rows",
+        inputtype: NumberInput
+    }, {
+        name: "Disabled",
+        key: "disabled",
+        htmlAttr: "disabled",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
+	},{
+        name: "Required",
+        key: "required",
+        htmlAttr: "required",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
+    }]	
 });
 Vvveb.Components.extend("_base", "html/radiobutton", {
     name: "Radio Button",
@@ -480,6 +643,20 @@ Vvveb.Components.extend("_base", "html/radiobutton", {
         inputtype: CheckboxInput,
         //inline:true,
         //col:6
+	},{
+        name: "Disabled",
+        key: "disabled",
+        htmlAttr: "disabled",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
+	},{
+        name: "Required",
+        key: "required",
+        htmlAttr: "required",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
      }]
 });
 
@@ -513,32 +690,50 @@ Vvveb.Components.extend("_base", "html/checkbox", {
         inputtype: CheckboxInput,
         //inline:true,
         //col:6
+	},{
+        name: "Disabled",
+        key: "disabled",
+        htmlAttr: "disabled",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
+	},{
+        name: "Required",
+        key: "required",
+        htmlAttr: "required",
+		col:6,
+		inline:true,
+        inputtype: CheckboxInput,
      }]
 });
 
+/*
 Vvveb.Components.extend("_base", "html/fileinput", {
     name: "Input group",
 	attributes: {"type":"file"},
     image: "icons/text_input.svg",
-    html: '<div class="mb-3">\
-			  <input type="file" class="form-control">\
-			</div>'
+    html: '<input type="file" class="form-control">'
 });
-
+*/
 
 Vvveb.Components.extend("_base", "html/video", {
     nodes: ["video"],
     name: "Video",
-    html: '<video width="320" height="240" playsinline loop autoplay><source src="https://storage.googleapis.com/coverr-main/mp4/Mt_Baker.mp4"><video>',
+    html: '<video width="320" height="240" playsinline loop autoplay muted src="../../media/demo/sample.webm" poster="../../media/sample.webp"><video>',
     dragHtml: '<img  width="320" height="240" src="' + Vvveb.baseUrl + 'icons/video.svg">',
 	image: "icons/video.svg",
     resizable:true,//show select box resize handlers
     properties: [{
-        name: "Src",
-        child: "source",
+        name: "Video",
+        //child: "source",
         key: "src",
         htmlAttr: "src",
-        inputtype: LinkInput
+        inputtype: VideoInput
+    },{       
+		name: "Poster",
+        key: "poster",
+        htmlAttr: "poster",
+        inputtype: ImageInput
     },{
         name: "Width",
         key: "width",
@@ -583,7 +778,7 @@ Vvveb.Components.extend("_base", "html/video", {
         data: {
 			type:'warning',
 			title:'Autoplay',
-			text:'Most browsers allow autoplay only if video is muted and plays inline'
+			text:'Most browsers allow auto play only if video is muted and plays inline'
 		}
 	}]
 });
@@ -632,8 +827,6 @@ Vvveb.Components.extend("_base", "html/button", {
 		name: "Disabled",
         key: "disabled",
         htmlAttr: "disabled",
-		inline:true,
-        col:6,
         inputtype: CheckboxInput,
 		inline:true,
         col:6,
@@ -647,7 +840,7 @@ Vvveb.Components.extend("_base", "html/paragraph", {
 	html: '<p>Lorem ipsum</p>',
     properties: [{
         name: "Text align",
-        key: "text-align",
+        key: "p-text-align",
         htmlAttr: "class",
         inline:false,
         validValues: ["", "text-start", "text-center", "text-end"],
@@ -687,9 +880,19 @@ Vvveb.Components.extend("_base", "html/blockquote", {
     nodes: ["blockquote"],
     name: "Blockquote",
 	image: "icons/blockquote.svg",
-	html: `<blockquote>
-				Today I shall be meeting with interference, ingratitude, insolence, disloyalty, ill-will, and selfishness all of them due to the offenders' ignorance of what is good or evil..
+	html: `<blockquote cite="https://en.wikipedia.org/wiki/Marcus_Aurelius">
+				<p>Today I shall be meeting with interference, ingratitude, insolence, disloyalty, ill-will, and selfishness all of them due to the offenders' ignorance of what is good or evil.</p>
+				<cite class="small">
+					<a href="https://en.wikipedia.org/wiki/Marcus_Aurelius" class="text-decoration-none" target="blank">Marcus Aurelius</a>
+				</cite>	
 			</blockquote>`,
+    properties: [{
+        name: "Cite",
+        key: "cite",
+        inline:false,
+        htmlAttr: "cite",
+        inputtype: TextInput,
+    }]
 });
 
 Vvveb.Components.extend("_base", "html/list", {
@@ -808,6 +1011,7 @@ Vvveb.Components.extend("_base", "html/form", {
 
 Vvveb.Components.extend("_base", "html/tablerow", {
     nodes: ["tr"],
+    image: "icons/table.svg",
     name: "Table Row",
     html: "<tr><td>Cell 1</td><td>Cell 2</td><td>Cell 3</td></tr>",
     properties: [{
@@ -838,18 +1042,35 @@ Vvveb.Components.extend("_base", "html/tablerow", {
 });
 Vvveb.Components.extend("_base", "html/tablecell", {
     nodes: ["td"],
+    image: "icons/table.svg",
     name: "Table Cell",
     html: "<td>Cell</td>"
 });
 
 Vvveb.Components.extend("_base", "html/tableheadercell", {
     nodes: ["th"],
+    image: "icons/table.svg",
     name: "Table Header Cell",
     html: "<th>Head</th>"
 });
 
+Vvveb.Components.extend("_base", "html/tablebody", {
+    nodes: ["tbody"],
+    image: "icons/table.svg",
+    name: "Table Body",
+    html: "<tbody>Table body</tbody>"
+});
+
+Vvveb.Components.extend("_base", "html/tablefooter", {
+    nodes: ["tfooter"],
+    image: "icons/table.svg",
+    name: "Table Footer",
+    html: "<tfooter>Table footer</tfooter>"
+});
+
 Vvveb.Components.extend("_base", "html/tablehead", {
     nodes: ["thead"],
+    image: "icons/table.svg",
     name: "Table Head",
     html: "<thead><tr><th>Head 1</th><th>Head 2</th><th>Head 3</th></tr></thead>",
     properties: [{
@@ -913,8 +1134,7 @@ Vvveb.Components.extend("_base", "html/table", {
 				</tr>
 			  </tbody>
 			</table>`,
-    properties: [
-	{
+    properties: [{
         name: "Type",
         key: "type",
 		htmlAttr: "class",
@@ -927,34 +1147,33 @@ Vvveb.Components.extend("_base", "html/table", {
 			}, {
 				value: "table-primary",
 				text: "Primary"
-			}, {
+			},{
 				value: "table-secondary",
 				text: "Secondary"
-			}, {
+			},{
 				value: "table-success",
 				text: "Success"
-			}, {
+			},{
 				value: "table-danger",
 				text: "Danger"
-			}, {
+			},{
 				value: "table-warning",
 				text: "Warning"
-			}, {
+			},{
 				value: "table-info",
 				text: "Info"
-			}, {
+			},{
 				value: "table-light",
 				text: "Light"
-			}, {
+			},{
 				value: "table-dark",
 				text: "Dark"
-			}, {
+			},{
 				value: "table-white",
 				text: "White"
 			}]
         }
-    },
-	{
+    }, {
         name: "Responsive",
         key: "responsive",
         htmlAttr: "class",
@@ -964,8 +1183,7 @@ Vvveb.Components.extend("_base", "html/table", {
             on: "table-responsive",
             off: ""
         }
-    },   
-	{
+    }, {
         name: "Small",
         key: "small",
         htmlAttr: "class",
@@ -975,8 +1193,7 @@ Vvveb.Components.extend("_base", "html/table", {
             on: "table-sm",
             off: ""
         }
-    },   
-	{
+    }, {
         name: "Hover",
         key: "hover",
         htmlAttr: "class",
@@ -986,8 +1203,7 @@ Vvveb.Components.extend("_base", "html/table", {
             on: "table-hover",
             off: ""
         }
-    },   
-	{
+    }, {
         name: "Bordered",
         key: "bordered",
         htmlAttr: "class",
@@ -997,8 +1213,7 @@ Vvveb.Components.extend("_base", "html/table", {
             on: "table-bordered",
             off: ""
         }
-    },   
-	{
+    }, {
         name: "Striped",
         key: "striped",
         htmlAttr: "class",
@@ -1008,8 +1223,7 @@ Vvveb.Components.extend("_base", "html/table", {
             on: "table-striped",
             off: ""
         }
-    },   
-	{
+    }, {
         name: "Inverse",
         key: "inverse",
         htmlAttr: "class",
@@ -1086,94 +1300,6 @@ Vvveb.Components.extend("_base", "html/audio", {
     }]
 });
 
-Vvveb.Components.extend("_base", "html/video", {
-    nodes: ["video"],
-    name: "Video",
-    image: "icons/video.svg",
-    html: `<video controls playsinline src="/media/Sky Clouds Royalty Free HD Video Footage [CC0] [fmngCpy1O2E].webm" poster="/media/Sky Clouds Royalty Free HD Video Footage [CC0] [fmngCpy1O2E].webp"></video>`,
-    properties: [{
-        name: "Poster",
-        key: "poster",
-        htmlAttr: "poster",
-        inputtype: ImageInput
-    }, {
-        name: "Src",
-        key: "src",
-        htmlAttr: "src",
-        inputtype: LinkInput
-    },{
-		key: "video_options",
-        inputtype: SectionInput,
-        name:false,
-        data: {header:"Options"},
-    }, {
-		name: "Auto play",
-        key: "autoplay",
-        htmlAttr: "autoplay",
-        inputtype: CheckboxInput,
-        data: {
-            on: "true",
-            off: "false"
-        },
-        inline:true,
-        col:4,
-	}, {
-        name: "Controls",
-        key: "controls",
-        htmlAttr: "controls",
-        inputtype: CheckboxInput,
-        data: {
-            on: "true",
-            off: "false"
-        },
-        inline:true,
-        col:4,
-    }, {
-        name: "Loop",
-        key: "loop",
-        htmlAttr: "loop",
-        inputtype: CheckboxInput,
-        data: {
-            on: "true",
-            off: "false"
-        },
-        inline:true,
-        col:4,
-    }, {
-        name: "Play inline",
-        key: "playsinline",
-        htmlAttr: "playsinline",
-        inputtype: CheckboxInput,
-        data: {
-            on: "true",
-            off: "false"
-        },
-        inline:true,
-        col:4,
-	}, {
-        name: "Muted",
-        key: "muted",
-        htmlAttr: "muted",
-        inputtype: CheckboxInput,
-        data: {
-            on: "true",
-            off: "false"
-        },
-        inline:true,
-        col:4,
-    },{
-	name:"",
-	key: "autoplay_warning",
-        inline:false,
-        col:12,
-        inputtype: NoticeInput,
-        data: {
-			type:'warning',
-			title:'Autoplay',
-			text:'Most browsers allow auto play only if video is muted and plays inline'
-		}
-	}]
-});
 
 Vvveb.Components.extend("_base", "html/pdf", {
     attributes: ["data-component-pdf"],
@@ -1232,3 +1358,29 @@ Vvveb.ComponentsGroup['Base'] =
 ["html/heading", "html/image", "html/hr",  "html/form", "html/textinput", "html/textareainput", "html/selectinput", "html/fileinput", "html/checkbox", "html/radiobutton", "html/link", "html/video", "html/button", "html/paragraph", "html/blockquote", "html/list", "html/table", "html/preformatted"];
 
 */
+
+Vvveb.Components.extend("_base", "html/iframe", {
+	attributes: ["data-component-iframe"],
+    name: "Iframe",
+    image: "icons/file.svg",
+    html: '<div data-component-iframe><iframe src="https://www.vvveb.com" width="320" height="240"></iframe></div>',
+	properties: [{
+        name: "Src",
+        key: "src",
+        htmlAttr: "src",
+        child:"iframe",
+        inputtype: TextInput
+    }, {
+        name: "Width",
+        key: "width",
+        htmlAttr: "width",
+        child:"iframe",
+        inputtype: CssUnitInput
+    }, {
+        name: "Height",
+        key: "height",
+        htmlAttr: "height",
+        child:"iframe",
+        inputtype: CssUnitInput
+	}]	
+});

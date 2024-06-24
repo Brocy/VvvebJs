@@ -3,7 +3,8 @@
 $html = file_get_contents('editor.html');
 
 //search for html files in demo and my-pages folders
-$htmlFiles = glob('{my-pages/*.html,demo/*\/*.html, demo/*.html}',  GLOB_BRACE);
+//$htmlFiles = glob('{my-pages/*.html,demo/*\/*.html, demo/*.html}',  GLOB_BRACE);
+$htmlFiles = array_merge(glob('my-pages/*.html'),glob('demo/*\/*.html'), glob('demo/*.html'));
 $files = '';
 foreach ($htmlFiles as $file) { 
    if (in_array($file, array('new-page-blank-template.html', 'editor.html'))) continue;//skip template files
@@ -15,13 +16,14 @@ foreach ($htmlFiles as $file) {
 	   $filename = $subfolder;
    }
    $url = $pathInfo['dirname'] . '/' . $pathInfo['basename'];
-   $name = ucfirst($filename);
+   $name = $filename;
+   $title = ucfirst($name);
 
-  $files .= "{name:'$name', file:'$file', title:'$name',  url: '$url', folder:'$folder'},";
+  $files .= "{name:'$name', file:'$file', title:'$title',  url: '$url', folder:'$folder'},";
 } 
 
 
 //replace files list from html with the dynamic list from demo folder
-$html = str_replace('(pages);', "([$files]);", $html);
+$html = str_replace('= defaultPages;', " = [$files];", $html);
 
 echo $html;

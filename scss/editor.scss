@@ -16,10 +16,6 @@ limitations under the License.
 https://github.com/givanz/VvvebJs
 */
 
-html {
-	font-size:14px;
-}
-
 body
 {
 	font-family:"Helvetica Neue", Helvetica, -apple-system, Arial, "Lucida Grande", system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -37,10 +33,7 @@ $custom-select-padding-y: .4rem;
 //$light: var(--bs-secondary-bg-subtle);
 //$blue:#495ffb;
 
-#logo
-{
-	margin-left: 0.5rem;
-	margin-top: 0.15rem;
+#logo {
 	
 	html[data-bs-theme="dark"] & {
 	    filter: brightness(3);
@@ -62,6 +55,7 @@ $link-decoration: none;
 $font-size-base: 1rem;
 
 @import "line-awesome/line-awesome";
+@import "ionicons";
 @import "bootstrap/bootstrap";
 @import "builder";
 @import "components/gallery";
@@ -95,14 +89,14 @@ $font-size-base: 1rem;
 		}
 		
 		i {
-			//border-right:1px solid rgba(0,0,0, 0.1);
+			//border-right:1px solid rgba(var(--bs-body-color-rgb), 0.1);
 			background:transparent;
 		}
 	}
 	
 	&.btn-outline-secondary {
-		box-shadow:0px 0px 2px 1px rgba(0, 0, 0, 0.07), -1px 1px 2px 0px rgba(255, 255, 255, 0.15) inset;
-		box-shadow:1px 1px 1px 0px rgba(0, 0, 0, 0.07);
+		box-shadow:0px 0px 2px 1px rgba(var(--bs-body-color-rgb), 0.07), -1px 1px 2px 0px rgba(var(--bs-body-bg-rgb), 0.15) inset;
+		box-shadow:1px 1px 1px 0px rgba(var(--bs-body-color-rgb), 0.07);
 	}
 	
 	&.btn-gray
@@ -114,7 +108,7 @@ $font-size-base: 1rem;
 	
 	&.btn-secondary
 	{
-		box-shadow:-1px 1px 2px 1px rgba(0,0,0,0.07),-1px 1px 2px 0px rgba(255,255,255,0.15) inset;
+		box-shadow:-1px 1px 2px 1px rgba(var(--bs-body-color-rgb),0.07),-1px 1px 2px 0px rgba(var(--bs-body-bg-rgb),0.15) inset;
 
 		i
 		{
@@ -123,10 +117,10 @@ $font-size-base: 1rem;
 	}
 
 	&.btn-primary {
-		box-shadow:-1px 1px 2px 1px rgba(0,0,0,0.07),-1px 1px 2px 0px rgba(255,255,255,0.15) inset;
+		box-shadow:-1px 1px 2px 1px rgba(var(--bs-body-color-rgb),0.07),-1px 1px 2px 0px rgba(var(--bs-body-bg-rgb),0.15) inset;
 
 		i {
-			/*background: rgba(255,255,255, 0.1);*/
+			/*background: rgba(var(--bs-body-bg-rgb), 0.1);*/
 		}
 	}
 	
@@ -144,7 +138,7 @@ label.form-check .form-check-input {
 }
 .form-check .form-check-input {
     position: relative;
-    box-shadow: 0px 0px 2px 1px rgba(0, 0, 0, 0.07) inset;
+    box-shadow: 0px 0px 2px 1px rgba(var(--bs-body-color-rgb), 0.07) inset;
 }
 
 .alert-light {
@@ -164,7 +158,7 @@ label.form-check .form-check-input {
 .btn-outline-secondary
 {
 	//color:#555;
-	//border-color:#ddd;
+	//border-color:var(--bs-border-color);
 }
 
 
@@ -184,4 +178,8 @@ label.form-check .form-check-input {
     display: block;
     margin-left: auto;
     margin-right: auto;
+}
+
+video, audio {
+	max-width:100%;
 }
